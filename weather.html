@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Vejroversigt</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+  <div class="widget" style="margin: 10px; width: 300px;">
+    <div class="panel panel-info">
+      <div class="panel-heading" id="header">$header</div>
+      <ul class="list-group">
+          <li class="list-group-item" id="icon">Vejret: <img src=$icon alt=""></li>
+        <li class="list-group-item" id="temp">Temperatur: <b>$temperature</b></li>
+        <li class="list-group-item" id="humid">Luftfugtighed: <b>$humidity</b></li>
+        <li class="list-group-item" id="wind">Vind: <b>$wind</b></li>
+        <li class="list-group-item">
+            <form class="form-inline">
+              <div class="form-group">
+                <input type="text" class="form-control" autocomplete="off" name="location" id="location" placeholder="Bynavn" oninput="doLookupForCityInInputField(event)">
+              </div>
+              <button type="submit" class="btn btn-default">Find</button>
+            </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

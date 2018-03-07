@@ -1,0 +1,85 @@
+<script>
+
+//Intialization
+var serverURL = "http://localhost:8080/"
+setFocus();
+
+/**
+ * Function for getting a suggestion for a full city name, from DAWA.
+ * 
+ * @param {string} cityName 
+ */
+function doLookupForCityInInputField(event)
+{
+    //Check if user is deleting text, and has input at least 3 letters.
+    var cityName = document.getElementById("location").value;
+    if (cityName.length > 2 && event.inputType != 'deleteContentBackward')
+    {
+        var dawaLookupURL = 'https://dawa.aws.dk/postnumre/autocomplete?q=' + cityName + "&side=1&per_side=1";
+        httpGetAsync(dawaLookupURL, parseDawaAndDoLookup);       
+    }
+}
+
+function parseDawaAndDoLookup(unparsedResponse)
+{
+    var dawaResult = JSON.parse(unparsedResponse);
+    //Check if there is a city found. Else stop.
+    if (dawaResult.length == 1)
+    {
+        var cityName = dawaResult[0].postnummer.navn;
+        updateInputFieldWithCity(cityName);
+        getWeatherJSONForCity(cityName, replaceHTMLAndUrlWithNewLocationData);
+    }
+}
+
+function updateInputFieldWithCity(cityName)
+{
+    var inputField = document.getElementById("location");
+    selectionStart = inputField.selectionStart
+    var userInput = '' + inputField.value.substring(0, selectionStart);
+    inputField.value = cityName;
+    inputField.setSelectionRange(userInput.length, cityName.length);
+    setFocus();
+}
+
+function getWeatherJSONForCity(cityName, callbackFunction)
+{
+    var URL = serverURL + "?location=" + cityName + "&" + "jsononly=true";
+    httpGetAsync(URL, callbackFunction);
+}
+
+/**
+ * Function for doing async http requests, to avoid locking the UI.
+ * 
+ */
+function httpGetAsync(URL, callbackFunction)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+        callbackFunction(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", URL, true);
+    xmlHttp.send(null);
+}
+
+function replaceHTMLAndUrlWithNewLocationData(json, url)
+{
+    var parsedWeatherObject = JSON.parse(json);
+    if (parsedWeatherObject.degrees != null) //Check if the city exists, in case of missing data.
+    {
+        document.getElementById("header").innerHTML = "Vejret i <b>" + parsedWeatherObject.location + "</b>";
+        document.getElementById("icon").innerHTML ="Vejret: <img src=" + parsedWeatherObject.icon + " alt=''>";
+        document.getElementById("temp").innerHTML = "Temperatur: <b>" + parsedWeatherObject.degrees + "°C</b>";
+        document.getElementById("humid").innerHTML = "Luftfugtighed: <b>" + parsedWeatherObject.humidity + "</b>";
+        document.getElementById("wind").innerHTML = "Vind: <b>" + parsedWeatherObject.wind + " m/s " + parsedWeatherObject.windDirection + "</b>";
+        window.history.pushState("mandatoryString", "Vejroversigt", serverURL +"?location=" + parsedWeatherObject.location); //Update the browser URL.
+    }
+}
+
+function setFocus()
+{
+    document.getElementById("location").focus();
+}
+
+</script>
